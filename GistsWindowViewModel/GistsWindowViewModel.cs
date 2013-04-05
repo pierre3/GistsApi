@@ -343,17 +343,17 @@ namespace WpfSample.ViewModel
     {
       try
       {
-        StatusMessage = string.Format("[{0}]: 処理中です...", apiName);
+        StatusMessage = string.Format("[{0}]: Processing...", apiName);
         await callApi();
-        StatusMessage = string.Format("[{0}]: 完了しました。", apiName);
+        StatusMessage = string.Format("[{0}]: Completed.", apiName);
       }
       catch (System.Net.Http.HttpRequestException e)
       {
-        StatusMessage = string.Format("[{0}]: 失敗しました。{1}", apiName, e.Message);
+        StatusMessage = string.Format("[{0}]: Error. {1}", apiName, e.Message);
       }
       catch (OperationCanceledException)
       {
-        StatusMessage = string.Format("[{0}]: キャンセルしました。", apiName);
+        StatusMessage = string.Format("[{0}]: Canceled.", apiName);
       }
     }
     #endregion

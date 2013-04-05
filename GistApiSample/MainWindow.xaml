@@ -40,8 +40,8 @@
                 </ListBox.ItemTemplate>
             </ListBox>
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Padding="10,4" Margin="0,0,24,0" Content="更新(上書き)" Command="{Binding EditAGistCommand}"/>
-                <Button Padding="10,4" Margin="0,0,16,0" Content="削除" Command="{Binding DeleteCommand}"/>
+                <Button Padding="10,4" Margin="0,0,24,0" Content="Update(overwrite)" Command="{Binding EditAGistCommand}"/>
+                <Button Padding="10,4" Margin="0,0,16,0" Content="Delete" Command="{Binding DeleteCommand}"/>
             </StackPanel>
             <Separator Grid.Row="2" Margin="4,24,16,8" Height="4" />
             <Grid Grid.Row="3" Margin="2,2,18,2">
@@ -73,7 +73,7 @@
                          Text="{Binding UploadFileDescription,Mode=TwoWay}" />
             </Grid>
             <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
-                <CheckBox Content="Public" Margin="4,8,24,8" IsChecked="{Binding IsPublicUploadFile,Mode=TwoWay}" />
+                <CheckBox Content="Public" Margin="4,8,24,8" IsChecked="{Binding UploadFileIsPublic,Mode=TwoWay}" />
                 <Button Padding="4" Margin="2,2,2,8" Content="Create a Gist" Command="{Binding CreateAGistCommand}"/>
             </StackPanel>
         </Grid>
