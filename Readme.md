@@ -83,7 +83,7 @@ try
     ShowMessageMethod("List gists...");
 
     var myGist = await gistClient.ListGists()
-        .First(gist=>gist.Files.First().filename == "myFilename");
+        .First(gist => gist.Files.First().filename == "myFilename" );
     var downloadText = await gistClient.DownloadRawText(myGist.Files.First().raw_url);
 
     ShowMessageMethod("Completed.");
