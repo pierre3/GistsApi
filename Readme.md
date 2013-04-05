@@ -1,7 +1,8 @@
 # Gists API C# library
 
+[Gists API v3](http://developer.github.com/v3/gists/) for .Net
 - .Net Framework4.5
-- HttpClient (System.Net.Http Namespace) 
+- HttpClient ([System.Net.Http Namespace](http://msdn.microsoft.com/library/system.net.http.aspx)) 
 - [DynamicJson](http://dynamicjson.codeplex.com/)
 
 ## GistClient class
@@ -40,7 +41,8 @@ public class GistObject
     public History[] history { get; set; }
 }
 ```
-## OAuth 2.0 flow (for WPF)
+## Exsamples
+### OAuth 2.0 flow (for WPF)
 xaml
 ```xml
 <WebBrowser Name="webBrowser" LoadCompleted="webBrowser_LoadCompleted"/>
@@ -73,7 +75,7 @@ private async void webBrowser_LoadCompleted(object sender, NavigationEventArgs e
 }
 ```
 
-## Exsamples
+### Asynchronous Methods
 
 ```cs
 try
@@ -96,3 +98,7 @@ catch (OperationCanceledException)
     ShowMessageMethod("Canceled".);
 }
 ```
+
+## WPF Sample Project
+See [GistApiSample](https://github.com/pierre3/GistsApi/tree/master/GistApiSample) for details.
+
