@@ -1,6 +1,6 @@
 # Gists API C# library
 
-[Gists API v3](http://developer.github.com/v3/gists/) for .Net
+[Gists API](http://developer.github.com/v3/gists/) library for .Net
 - .Net Framework4.5
 - HttpClient ([System.Net.Http Namespace](http://msdn.microsoft.com/library/system.net.http.aspx)) 
 - [DynamicJson](http://dynamicjson.codeplex.com/)
@@ -100,5 +100,11 @@ catch (OperationCanceledException)
 ```
 
 ## WPF Sample Project
-See [GistApiSample](https://github.com/pierre3/GistsApi/tree/master/GistApiSample) for details.
+![sample window](https://raw.github.com/pierre3/Images/master/GistApiSampleWindow.png)
 
+To run this Application,Command-line argument specifies "ClientID" and "ClientSecret".  
+Register application, and Get your ClientID and ClientSecret.
+ =>[Register a new OAuth application](https://github.com/settings/applications/new)
+
+
+- See [GistApiSample](https://github.com/pierre3/GistsApi/tree/master/GistApiSample) for details.
