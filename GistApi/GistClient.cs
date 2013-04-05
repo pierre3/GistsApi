@@ -1,15 +1,10 @@
-﻿using System;
-using System.Net;
-using System.Text;
+﻿using Codeplex.Data;
+using System;
 using System.Collections.Generic;
-using Codeplex.Data;
-using System.Net.Http;
-using System.Windows.Input;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using System.Threading;
 using System.Linq;
-using System.Dynamic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GistsApi
 {
@@ -20,6 +15,14 @@ namespace GistsApi
     private string _scope;
     private string _accessToken;
     private CancellationTokenSource cancellationTS;
+    
+    public Uri AuthorizeUrl
+    { 
+      get {
+        return new Uri(string.Format("https://github.com/login/oauth/authorize?client_id={0}&scope={1}",
+          _clientId, _scope));
+      } 
+    }
 
     public GistClient(string clientKey, string clientSecret)
     {
@@ -36,13 +39,6 @@ namespace GistsApi
       cancellationTS = new CancellationTokenSource();
     }
 
-    public Uri MakeAuthorizeUrl()
-    {
-      //GET https://github.com/login/oauth/authorize
-
-      return new Uri(string.Format("https://github.com/login/oauth/authorize?client_id={0}&scope={1}",
-        _clientId, _scope));
-    }
         
     public async Task Authorize(string authCode)
     {

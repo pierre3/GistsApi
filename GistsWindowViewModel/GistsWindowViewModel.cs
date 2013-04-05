@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using GistsApi;
+using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.ObjectModel;
-using GistsApi;
-using System.Windows.Input;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace WpfSample.ViewModel
 {
@@ -224,7 +222,7 @@ namespace WpfSample.ViewModel
     public void NavigateToGistLogin()
     {
       this.BrowserVisible = true;
-      this.NavigateUri = this._gistClient.MakeAuthorizeUrl();
+      this.NavigateUri = this._gistClient.AuthorizeUrl;
     }
     #endregion
 
