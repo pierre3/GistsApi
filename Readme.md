@@ -42,7 +42,7 @@ public class GistObject
 ```
 ## OAuth 2.0 flow (for WPF)
 xaml
-```xaml
+```xml
 <WebBrowser Name="webBrowser" LoadCompleted="webBrowser_LoadCompleted"/>
 ```
 xaml.cs
@@ -79,11 +79,11 @@ private async void webBrowser_LoadCompleted(object sender, NavigationEventArgs e
 try
 {
     ShowMessageMethod("List gists...");
-    
+
     var myGist = await gistClient.ListGists()
-        .First(gist=>gist.Files.First().filename == "MyGist.md");
+        .First(gist=>gist.Files.First().filename == "myFilename");
     var downloadText = await gistClient.DownloadRawText(myGist.Files.First().raw_url);
-    
+
     ShowMessageMethod("Completed.");
     ShowMessageMethod(downloadText);
 }
@@ -95,5 +95,4 @@ catch (OperationCanceledException)
 {
     ShowMessageMethod("Canceled".);
 }
-
 ```
