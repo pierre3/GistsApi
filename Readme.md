@@ -102,8 +102,8 @@ catch (OperationCanceledException)
 ## WPF Sample Project
 ![sample window](https://raw.github.com/pierre3/Images/master/GistApiSampleWindow.png)
 
-To run this Application,Command-line argument specifies "ClientID" and "ClientSecret".  
-Register application, and Get your ClientID and ClientSecret.
+To run this application,command-line argument specifies "clientID" and "clientSecret".  
+Register application, and get your "clientID" and "clientSecret".
  =>[Register a new OAuth application](https://github.com/settings/applications/new)
 
 
