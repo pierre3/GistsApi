@@ -15,13 +15,14 @@ namespace GistsApi
     private string _scope;
     private string _accessToken;
     private CancellationTokenSource cancellationTS;
-    
+
     public Uri AuthorizeUrl
-    { 
-      get {
+    {
+      get
+      {
         return new Uri(string.Format("https://github.com/login/oauth/authorize?client_id={0}&scope={1}",
           _clientId, _scope));
-      } 
+      }
     }
 
     public GistClient(string clientKey, string clientSecret)
@@ -35,11 +36,8 @@ namespace GistsApi
     public void Cancel()
     {
       cancellationTS.Cancel();
-      cancellationTS.Dispose();
-      cancellationTS = new CancellationTokenSource();
     }
 
-        
     public async Task Authorize(string authCode)
     {
       //POST https://github.com/login/oauth/access_token
@@ -51,8 +49,8 @@ namespace GistsApi
       using (var httpClient = CreateHttpClient())
       {
         var response = await httpClient.PostAsync(requestUrl, null, cancellationTS.Token);
-        response.EnsureSuccessStatusCode();
-        var responseString = await response.Content.ReadAsStringAsync();
+        var responseString = await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
+
         var json = DynamicJson.Parse(responseString);
         _accessToken = (string)json.access_token;
       }
@@ -61,72 +59,102 @@ namespace GistsApi
     public async Task<IEnumerable<GistObject>> ListGists()
     {
       //GET /gists
-      
-      if (string.IsNullOrEmpty(_accessToken))
-      { throw new InvalidOperationException("AccessToken is empty."); }
-
       var requestUrl = new Uri(string.Format("https://api.github.com/gists?access_token={0}", _accessToken));
       using (var httpClient = CreateHttpClient())
       {
-        var response = await httpClient.GetAsync(requestUrl,cancellationTS.Token);
-        response.EnsureSuccessStatusCode();
-        var responseString = await response.Content.ReadAsStringAsync();
+        var response = await httpClient.GetAsync(requestUrl, cancellationTS.Token);
+        var responseString = await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
+
         var json = (dynamic[])DynamicJson.Parse(responseString);
-        return json.Select(j=>(GistObject)DynamicToGistObject(j));
+        return json.Select(j => (GistObject)DynamicToGistObject(j));
       }
     }
 
-    public async Task<GistObject> CreateAGist(string description, string fileName, bool isPublic, string content)
+    public async Task<GistObject> GetSingleGist(string id)
     {
-      if (string.IsNullOrEmpty(_accessToken))
-      { throw new InvalidOperationException("AccessToken is empty."); }
-
+      //GET /gists/:id
+      var requestUrl = new Uri(string.Format("https://api.github.com/gists/{0}?access_token={1}", id, _accessToken));
       using (var httpClient = CreateHttpClient())
       {
-        var requestUrl = new Uri(string.Format("https://api.github.com/gists?access_token={0}", _accessToken));
-        
-        var uploadData = MakeUploadData(description, fileName, isPublic, content);
-        var bytes = System.Text.Encoding.UTF8.GetBytes(uploadData);
-        var data = new ByteArrayContent(bytes);
-
-        var response = await httpClient.PostAsync(requestUrl, data, cancellationTS.Token);
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
+        var response = await httpClient.GetAsync(requestUrl, cancellationTS.Token);
+        var json = await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
 
         return DynamicToGistObject(DynamicJson.Parse(json));
       }
     }
 
-    public async Task<GistObject> EditAGist(string id,string description, string filename, string content)
+    public async Task<GistObject> CreateAGist(string description, bool isPublic, IEnumerable<Tuple<string, string>> fileContentCollection)
+    {
+      //POST /gists
+      using (var httpClient = CreateHttpClient())
+      {
+        var requestUrl = new Uri(string.Format("https://api.github.com/gists?access_token={0}", _accessToken));
+        var content = MakeCreateContent(description, isPublic, fileContentCollection);
+        var data = new StringContent(content, System.Text.Encoding.UTF8, "application/json");
+
+        var response = await httpClient.PostAsync(requestUrl, data, cancellationTS.Token);
+        var json = await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
+
+        return DynamicToGistObject(DynamicJson.Parse(json));
+      }
+    }
+
+    public async Task<GistObject> EditAGist(string id, string description, string targetFilename, string content)
     {
       //PATCH /gists/:id
-      if (string.IsNullOrEmpty(_accessToken))
-      { throw new InvalidOperationException("AccessToken is empty."); }
-      
       using (var httpClient = CreateHttpClient())
       {
         var requestUrl = new Uri(string.Format("https://api.github.com/gists/{0}?access_token={1}", id, _accessToken));
-        var editData = MakeUploadData(description, filename, content);
-        var bytes = System.Text.Encoding.UTF8.GetBytes(editData);
-        
         var httpMessage = new HttpRequestMessage(new HttpMethod("PATCH"), requestUrl);
-        httpMessage.Content =new ByteArrayContent(bytes);
-        
+        var editData = MakeEditContent(description, targetFilename, content);
+        httpMessage.Content = new StringContent(editData, System.Text.Encoding.UTF8, "application/json");
+
         var response = await httpClient.SendAsync(httpMessage, cancellationTS.Token);
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
+
+        return DynamicToGistObject(DynamicJson.Parse(json));
+      }
+    }
+
+    public async Task<GistObject> EditAGist(string id, string description, string oldFilename, string newFilename, string content)
+    {
+      //PATCH /gists/:id
+      using (var httpClient = CreateHttpClient())
+      {
+        var requestUrl = new Uri(string.Format("https://api.github.com/gists/{0}?access_token={1}", id, _accessToken));
+        var httpMessage = new HttpRequestMessage(new HttpMethod("PATCH"), requestUrl);
+        var editData = MakeEditContent(description, oldFilename, newFilename, content);
+        httpMessage.Content = new StringContent(editData, System.Text.Encoding.UTF8, "application/json");
+
+        var response = await httpClient.SendAsync(httpMessage, cancellationTS.Token);
+        var json = await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
+
+        return DynamicToGistObject(DynamicJson.Parse(json));
+      }
+    }
+
+    public async Task<GistObject> DeleteAFile(string id, string description, string filename)
+    {
+      //PATCH /gists/:id
+      using (var httpClient = CreateHttpClient())
+      {
+        var requestUrl = new Uri(string.Format("https://api.github.com/gists/{0}?access_token={1}", id, _accessToken));
+        var httpMessage = new HttpRequestMessage(new HttpMethod("PATCH"), requestUrl);
+        var editData = MakeDeleteFileContent(description, filename);
+        httpMessage.Content = new StringContent(editData, System.Text.Encoding.UTF8, "application/json");
+
+        var response = await httpClient.SendAsync(httpMessage, cancellationTS.Token);
+        var json = await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
+
         return DynamicToGistObject(DynamicJson.Parse(json));
       }
     }
 
     public async Task DeleteAGist(string id)
-    { 
+    {
       //DELETE /gists/:id
-      if (string.IsNullOrEmpty(_accessToken))
-      { throw new InvalidOperationException("AccessToken is empty."); }
-
       using (var httpClient = CreateHttpClient())
-      { 
+      {
         var requestUrl = new Uri(string.Format("https://api.github.com/gists/{0}?access_token={1}", id, _accessToken));
         var response = await httpClient.DeleteAsync(requestUrl);
         response.EnsureSuccessStatusCode();
@@ -138,8 +166,7 @@ namespace GistsApi
       using (var httpClient = CreateHttpClient())
       {
         var response = await httpClient.GetAsync(rawUrl, cancellationTS.Token);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStringAsync();
+        return await response.EnsureSuccessStatusCode().Content.ReadAsStringAsync();
       }
     }
 
@@ -154,28 +181,51 @@ namespace GistsApi
       return httpClient;
     }
 
-    protected string MakeUploadData(string _description, string _filename, bool _isPublic, string _content)
+    protected static string MakeCreateContent(string _description, bool _isPublic, IEnumerable<Tuple<string, string>> fileContentCollection)
     {
-      var result = DynamicJson.Serialize(new
+      dynamic _result = new DynamicJson();
+      dynamic _file = new DynamicJson();
+      _result.description = _description;
+      _result.@public = _isPublic.ToString().ToLower();
+      _result.files = new { };
+      foreach (var fileContent in fileContentCollection)
       {
-        description = _description,
-        @public = _isPublic.ToString().ToLower(),
-        files = new { _x_FILE_NAME_x_ = new { filename = _filename, content = _content } }
-      });
-      return result.Replace("_x_FILE_NAME_x_", _filename);
+        _result.files[fileContent.Item1] = new { filename = fileContent.Item1, content = fileContent.Item2 };
+      }
+      return _result.ToString();
     }
 
-    protected string MakeUploadData(string _description, string _filename, string _content)
+    protected static string MakeEditContent(string _description, string _targetFileName, string _content)
     {
-      var result = DynamicJson.Serialize(new
-      {
-        description = _description,
-        files = new { _x_FILE_NAME_x_ = new { content = _content } }
-      });
-      return result.Replace("_x_FILE_NAME_x_", _filename);
+      dynamic _result = new DynamicJson();
+      dynamic _file = new DynamicJson();
+      _result.description = _description;
+      _result.files = new { };
+      _result.files[_targetFileName] = new { content = _content };
+      return _result.ToString();
     }
 
-    protected GistObject DynamicToGistObject(dynamic json)
+    protected static string MakeEditContent(string _description, string _oldFileName, string _newFileName, string _content)
+    {
+      dynamic _result = new DynamicJson();
+      dynamic _file = new DynamicJson();
+      _result.description = _description;
+      _result.files = new { };
+      _result.files[_oldFileName] = new { filename = _newFileName, content = _content };
+      return _result.ToString();
+    }
+
+    protected static string MakeDeleteFileContent(string _description, string filename)
+    {
+      dynamic _result = new DynamicJson();
+      dynamic _file = new DynamicJson();
+      _result.description = _description;
+      _result.files = new { };
+      _result.files[filename] = "null";
+      return _result.ToString();
+    }
+
+    protected static GistObject DynamicToGistObject(dynamic json)
     {
       var gist = (GistObject)json;
       var files = ((DynamicJson)json.files).DeserializeMembers(member =>

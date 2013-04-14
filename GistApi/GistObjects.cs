@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 namespace GistsApi
 {
   /*
-   * format of gist object
+   * JSON of gist object
    * 
    {
   "url": "https://api.github.com/gists/5f774909d8162f5b75f6",

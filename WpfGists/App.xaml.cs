@@ -5,9 +5,9 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using WpfSample.ViewModel;
+using WpfGists.ViewModel;
 
-namespace WpfSample
+namespace WpfGists
 {
   /// <summary>
   /// App.xaml の相互作用ロジック

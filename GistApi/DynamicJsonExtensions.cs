@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace GistsApi
 {
-  public static class DynamicJsonHelper
+  public static class DynamicJsonExtensions
   {
     public static IEnumerable<T> DeserializeMembers<T>(this DynamicJson dynamicJson, Func<dynamic, T> resultSelector)
     {

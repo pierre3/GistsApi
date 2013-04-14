@@ -7,12 +7,12 @@ using System.Windows;
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
-[assembly: AssemblyTitle("GistApiSample")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("WpfGists")]
+[assembly: AssemblyDescription("Gists client application.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("GistApiSample")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyProduct("WpfGists")]
+[assembly: AssemblyCopyright("© Pierre3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,13 +1,15 @@
 ﻿using GistsApi;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using WpfGists.Utility;
 
-namespace WpfSample.ViewModel
+namespace WpfGists.ViewModel
 {
   public class GistsWindowViewModel : INotifyPropertyChanged
   {
@@ -22,12 +24,15 @@ namespace WpfSample.ViewModel
     private ICommand _updateList;
     private ICommand _createAGist;
     private ICommand _editAGist;
+    private ICommand _deleteFile;
     private string _uploadFileName;
     private string _uploadFileDescription;
     private bool _uploadFileIsPublic;
     private bool _browserVisible;
     private string _text;
     private string _statusMessage;
+    private string[] _selectedFiles;
+    private bool _isProcessing;
     #endregion
 
     #region Properties
@@ -63,7 +68,6 @@ namespace WpfSample.ViewModel
         }
         return _fileOpenedAction;
       }
-
     }
 
     public ObservableCollection<GistListItem> ListItems
@@ -86,9 +90,13 @@ namespace WpfSample.ViewModel
         if (_selectedItem == value)
         { return; }
         _selectedItem = value;
-        _gistClient.Cancel();
-        OpenItem();
         OnPropertyChanged("SelectedItem");
+
+        if (SelectedItem != null)
+        {
+          UploadFileDescription = _selectedItem.Description;
+          OpenItem(_selectedItem.SelectedFile);
+        }
       }
     }
 
@@ -164,13 +172,25 @@ namespace WpfSample.ViewModel
       }
     }
 
+    public bool IsProcessing
+    {
+      get { return _isProcessing; }
+      set 
+      {
+        if (_isProcessing == value)
+        { return;}
+        _isProcessing = value;
+        OnPropertyChanged("IsProcessing");
+      }
+    }
+
     public ICommand DeleteCommand
     {
       get
       {
         if (_delete == null)
         {
-          _delete = new DelegateCommand(_ => DeleteAGists(), _ => CanDelete());
+          _delete = new DelegateCommand(_ => DeleteAGist(), _ => CanDelete());
         }
         return _delete;
       }
@@ -202,7 +222,7 @@ namespace WpfSample.ViewModel
 
     public ICommand EditAGistCommand
     {
-      get 
+      get
       {
         if (_editAGist == null)
         {
@@ -212,6 +232,17 @@ namespace WpfSample.ViewModel
       }
     }
 
+    public ICommand DeleteFileCommand
+    {
+      get
+      {
+        if (_deleteFile == null)
+        {
+          _deleteFile = new DelegateCommand(_ => DeleteFile(), _ => CanDeleteFile());
+        }
+        return _deleteFile;
+      }
+    }
     public GistsWindowViewModel(string clientId, string clientSecret)
     {
       this._gistClient = new GistClient(clientId, clientSecret);
@@ -258,32 +289,78 @@ namespace WpfSample.ViewModel
 
     private async void FileOpened(string[] fileNames)
     {
+      if (fileNames.Length > 1)
+      {
+        _selectedFiles = fileNames;
+
+        var names = fileNames.Select(s => "\"" + System.IO.Path.GetFileName(s) + "\"");
+        UploadFileName = names.Aggregate((a, b) => a + " " + b);
+        
+        Text = "*** Selected Files ***" + Environment.NewLine 
+          + names.Aggregate((a, b) => a + Environment.NewLine + b) + Environment.NewLine;
+        UploadFileDescription = "gist description...";
+        return;
+      }
+
+      _selectedFiles = null;
       var filename = fileNames.FirstOrDefault();
       if (string.IsNullOrEmpty(filename))
       { return; }
 
       UploadFileName = System.IO.Path.GetFileName(filename);
-      using (var reader = new System.IO.StreamReader(filename))
+      using (var stream = new System.IO.FileStream(filename,System.IO.FileMode.Open,System.IO.FileAccess.Read))
       {
-        Text = await reader.ReadToEndAsync();
+        var bytes = await stream.ReadBytesAsync().ConfigureAwait(false);
+        Text = bytes.GetCode().GetString(bytes);
       }
     }
 
-    private async void OpenItem()
+    private IObservable<Tuple<string, string>> OpenFiles(string[] fileNames)
     {
-      if (SelectedItem == null)
+      return ObservableEx.Create<Tuple<string, string>>(async (observer, ct) =>
+      {
+        try
+        {
+          IsProcessing = true;
+          foreach (var name in fileNames)
+          {
+            if (ct.IsCancellationRequested)
+            { return; }
+
+            using (var stream = new System.IO.FileStream(name, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+            {
+              var bytes = await stream.ReadBytesAsync().ConfigureAwait(false);
+              var text = bytes.GetCode().GetString(bytes);
+              observer.OnNext(Tuple.Create(System.IO.Path.GetFileName(name), text));
+            }
+            
+          }
+          observer.OnCompleted();
+        }
+        catch (Exception e)
+        {
+          observer.OnError(e);
+        }
+        finally
+        { IsProcessing = false; }
+
+      });
+    }
+
+    private async void OpenItem(File file)
+    {
+      if (file == null)
       { return; }
+      _gistClient.Cancel();
 
-      await TryAsyncApi("Opening " + SelectedItem.Filename,
-        async () =>Text = await _gistClient.DownloadRawText(new Uri(SelectedItem.RawUrl)));
-
-      UploadFileName = SelectedItem.Filename;
-      UploadFileDescription = SelectedItem.Description;
+      UploadFileName = file.filename;
+      await TryAsyncApi("Open " + file.filename,
+        async () => Text = await _gistClient.DownloadRawText(new Uri(file.raw_url)));
     }
 
     private async void EditAGist()
     {
-      await TryAsyncApi("Edit " + SelectedItem.Filename,
+      await TryAsyncApi("Edit " + UploadFileName,
         async () => await _gistClient.EditAGist(SelectedItem.ID, UploadFileDescription, UploadFileName, Text));
 
       await ListGists();
@@ -296,9 +373,9 @@ namespace WpfSample.ViewModel
         && !string.IsNullOrWhiteSpace(UploadFileDescription);
     }
 
-    private async void DeleteAGists()
+    private async void DeleteAGist()
     {
-      await TryAsyncApi("Delete Gists",
+      await TryAsyncApi("Delete a Gist",
         async () => await _gistClient.DeleteAGist(SelectedItem.ID));
 
       await ListGists();
@@ -309,6 +386,22 @@ namespace WpfSample.ViewModel
       return SelectedItem != null;
     }
 
+    private async void DeleteFile()
+    {
+      await TryAsyncApi("Delete a File",
+        async () => await _gistClient.DeleteAFile(SelectedItem.ID,
+          SelectedItem.Description, SelectedItem.SelectedFile.filename));
+
+      await ListGists();
+    }
+
+    private bool CanDeleteFile()
+    {
+      return (SelectedItem != null)
+        && (SelectedItem.SelectedFile != null);
+    }
+
+
     private async void UpdateList()
     {
       await ListGists();
@@ -316,10 +409,42 @@ namespace WpfSample.ViewModel
 
     private async void CreateAGist()
     {
-      await TryAsyncApi("Create A Gist",
-        async () => await _gistClient.CreateAGist(UploadFileDescription, UploadFileName, UploadFileIsPublic, Text));
+      if (_selectedFiles != null)
+      {
+        CreateAMultiFileGist();
+      }
+      else
+      {
+        await CreateASingleFileGist();
+        await ListGists();
+      }
+      
+    }
 
-      await ListGists();
+    private async Task CreateASingleFileGist()
+    {
+      await TryAsyncApi("Create A Gist",
+            async () => await _gistClient.CreateAGist(UploadFileDescription, UploadFileIsPublic,
+              new[] { Tuple.Create(UploadFileName, Text) }));
+    }
+
+    private void CreateAMultiFileGist()
+    {
+      var fileList = new List<Tuple<string, string>>();
+
+      var disposable = OpenFiles(_selectedFiles).Subscribe(file =>
+      {
+        StatusMessage = "[Open File] " + file.Item1;
+        fileList.Add(file);
+      },
+      e => StatusMessage = "[Open File] Error: " + e.Message,
+      async () =>
+      {
+        await TryAsyncApi("Create A Gist",
+          async () => await _gistClient.CreateAGist(UploadFileDescription, UploadFileIsPublic, fileList));
+        await ListGists();
+        _selectedFiles = null;
+      });
     }
 
     private bool CanCreateAGist()
@@ -335,7 +460,8 @@ namespace WpfSample.ViewModel
         async () =>
         {
           var gists = await _gistClient.ListGists();
-          ListItems = new ObservableCollection<GistListItem>(gists.Select(item => new GistListItem(item)));
+          ListItems = new ObservableCollection<GistListItem>(gists.Select(item =>
+            new GistListItem(item, GistListItem_SelectedFileChanged)));
         });
     }
 
@@ -343,6 +469,7 @@ namespace WpfSample.ViewModel
     {
       try
       {
+        IsProcessing = true;
         StatusMessage = string.Format("[{0}]: Processing...", apiName);
         await callApi();
         StatusMessage = string.Format("[{0}]: Completed.", apiName);
@@ -354,6 +481,18 @@ namespace WpfSample.ViewModel
       catch (OperationCanceledException)
       {
         StatusMessage = string.Format("[{0}]: Canceled.", apiName);
+      }
+      finally
+      {
+        IsProcessing = false;
+      }
+    }
+
+    private void GistListItem_SelectedFileChanged(File file)
+    {
+      if (_selectedItem.Files.Contains(file))
+      {
+        OpenItem(file);
       }
     }
     #endregion

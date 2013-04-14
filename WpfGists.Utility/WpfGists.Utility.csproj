@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7AE9ABCF-DBC9-4840-9955-EAAF333F9642}</ProjectGuid>
+    <ProjectGuid>{D8564AE3-0220-4A9D-88C7-9ED2C8F309CF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WpfSample.ViewModel</RootNamespace>
-    <AssemblyName>WpfSample.ViewModel</AssemblyName>
+    <RootNamespace>WpfGists.Utility</RootNamespace>
+    <AssemblyName>WpfGists.Utility</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -30,10 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Reactive, Version=1.0.10621.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -41,17 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DelegateCommand.cs" />
-    <Compile Include="GistsWindowViewModel.cs" />
-    <Compile Include="NavigatedResult.cs" />
+    <Compile Include="ByteArrayEx.cs" />
+    <Compile Include="ObservableEx.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="GistListItem.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\GistApi\GistsApi.csproj">
-      <Project>{d5758ade-8947-47b5-ae06-3e11daebad06}</Project>
-      <Name>GistsApi</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

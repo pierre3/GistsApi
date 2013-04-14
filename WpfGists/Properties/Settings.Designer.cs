@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace WpfSample.Properties {
+namespace WpfGists.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

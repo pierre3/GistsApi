@@ -2,7 +2,8 @@
 using System;
 using System.Windows;
 using System.Windows.Interactivity;
-namespace WpfSample
+
+namespace WpfGists
 {
   public class OpenFileDialogAction : TriggerAction<DependencyObject>
   {

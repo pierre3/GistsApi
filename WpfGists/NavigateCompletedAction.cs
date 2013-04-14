@@ -2,9 +2,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interactivity;
-using WpfSample.ViewModel;
+using WpfGists.ViewModel;
 
-namespace WpfSample
+namespace WpfGists
 {
   public class LoadCompletedBehavior : Behavior<WebBrowser>
   {
@@ -18,12 +18,12 @@ namespace WpfSample
     public static readonly DependencyProperty LoadCompletedActionProperty =
         DependencyProperty.Register("LoadCompletedAction", typeof(Action<NavigationResult>), typeof(LoadCompletedBehavior), new PropertyMetadata(null));
 
-    
     protected override void OnAttached()
     {
       base.OnAttached();
       this.AssociatedObject.LoadCompleted += AssociatedObject_LoadCompleted;
     }
+
     protected override void OnDetaching()
     {
       this.AssociatedObject.LoadCompleted -= AssociatedObject_LoadCompleted;

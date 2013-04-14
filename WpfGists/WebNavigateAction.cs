@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interactivity;
-namespace WpfSample
+namespace WpfGists
 {
   public class WebNavigateAction:TriggerAction<WebBrowser>
   {

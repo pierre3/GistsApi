@@ -7,8 +7,8 @@
     <ProjectGuid>{AF3FFF15-7692-4BC2-AD78-563BA2B1B338}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WpfSample</RootNamespace>
-    <AssemblyName>WpfSample</AssemblyName>
+    <RootNamespace>WpfGists</RootNamespace>
+    <AssemblyName>WpfGists</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -103,9 +103,9 @@
       <Project>{d5758ade-8947-47b5-ae06-3e11daebad06}</Project>
       <Name>GistsApi</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GistsWindowViewModel\WpfSample.ViewModel.csproj">
+    <ProjectReference Include="..\WpfGists.ViewModel\WpfGists.ViewModel.csproj">
       <Project>{7ae9abcf-dbc9-4840-9955-eaaf333f9642}</Project>
-      <Name>WpfSample.ViewModel</Name>
+      <Name>WpfGists.ViewModel</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

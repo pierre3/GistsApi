@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace WpfSample.ViewModel
+namespace WpfGists.ViewModel
 {
   
   public class DelegateCommand : ICommand
