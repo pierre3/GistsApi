@@ -1,9 +1,9 @@
 # Gists API C# library
 
-[Gists API](http://developer.github.com/v3/gists/) library for .Net
-- .Net Framework4.5
-- HttpClient ([System.Net.Http Namespace](http://msdn.microsoft.com/library/system.net.http.aspx)) 
-- [DynamicJson](http://dynamicjson.codeplex.com/)
+This is [Gists API](http://developer.github.com/v3/gists/) library for .Net.
+- Target: .Net Framework4.5
+- HttpClient ([System.Net.Http Namespace](http://msdn.microsoft.com/library/system.net.http.aspx)) based REST Interface.
+- Parsing JSON using [DynamicJson](http://dynamicjson.codeplex.com/).
 
 ## GistClient class
 
@@ -11,35 +11,25 @@
 public class GistClient
 {
     public Uri AuthorizeUrl{get;}
+    
     public GistClient(string clientKey, string clientSecret);
     
-    public async Task<GistObject> CreateAGist(string description, string fileName, bool isPublic, string content);
+    public async Task Authorize(string authCode);
     public async Task<IEnumerable<GistObject>> ListGists();
-    public async Task<GistObject> EditAGist(string id,string description, string filename, string content);
+    public async Task<GistObject> GetSingleGist(string id);
+    
+    public async Task<GistObject> CreateAGist(string description, bool isPublic, IEnumerable<Tuple<string, string>> fileContentCollection);
+    
+    public async Task<GistObject> EditAGist(string id, string description, string targetFilename, string content);
+    public async Task<GistObject> EditAGist(string id, string description, string oldFilename, string newFilename, string content);
+    public async Task<GistObject> DeleteAFile(string id, string description, string filename);
+    
     public async Task DeleteAGist(string id);
-    public async Task<string> DownloadRawText(Uri rawUrl); 
+    public async Task<string> DownloadRawText(Uri rawUrl);
     
     public void Cancel();
 }
 
-//Returns Object 
-public class GistObject
-{
-    public string url { set; get; }
-    public string id { set; get; }
-    public string description { set; get; }
-    public bool @public { set; get; }
-    public User user { set; get; }
-    public Files files { set; get; }
-    public double comments { set; get; }
-    public string comments_url { set; get; }
-    public string html_url { set; get; }
-    public string git_pull_url { set; get; }
-    public string git_push_url { set; get; }
-    public string created_at { set; get; }
-    public Fork[] forks { get; set; }
-    public History[] history { get; set; }
-}
 ```
 ## Exsamples
 ### OAuth 2.0 flow (for WPF)
@@ -75,28 +65,78 @@ private async void webBrowser_LoadCompleted(object sender, NavigationEventArgs e
 }
 ```
 
-### Asynchronous Methods
+### Usage
 
 ```cs
-try
-{
-    ShowMessageMethod("List gists...");
 
-    var myGist = await gistClient.ListGists()
-        .First(gist => gist.Files.First().filename == "myFilename" );
-    var downloadText = await gistClient.DownloadRawText(myGist.Files.First().raw_url);
+private GistClient gistClient;
 
-    ShowMessageMethod("Completed.");
-    ShowMessageMethod(downloadText);
-}
-catch (System.Net.Http.HttpRequestException e)
+public async void ListGists()
 {
-    ShowMessageMethod("Error." + e.Message);
+    try
+    {
+    
+        ShowMessage("List gists...");
+
+        var gists = await gistClient.ListGists();
+    
+        var myGist = gists.First(gist => gist.files.Any(file => file.filename == "MyGist_File1"));
+        var rawUrl = myGist.files.First(file => file.filename == "MyGist_File1").raw_url;
+    
+        var downloadText = await gistClient.DownloadRawText(rawUrl);
+
+        ShowMessage("Completed.");
+        ShowMessage(downloadText);
+    }
+
+    catch (System.Net.Http.HttpRequestException e)
+    {
+        ShowMessageMethod("Error." + e.Message);
+    }
+    catch (OperationCanceledException)
+    {
+        ShowMessageMethod("Canceled".);
+    }
 }
-catch (OperationCanceledException)
+
+public async void CreateAGist()
 {
-    ShowMessageMethod("Canceled".);
+    try
+    {
+        var description = "gist description";
+        bool isPublic = true;
+        var uploadFiles = new[]{
+            Tuple.Create("file1.txt", "file content..."),
+            Tuple.Create("file2.cs", "using system; ..."),
+            Tuple.Create("file2.md", "# Readme Gists API ...")
+        };
+        
+       ShowMessage("Create a gist")
+       
+       await gistClient.CreateAGist(description,isPublic,uploadFiles);
+       
+       ShowMessage("Completed.");
+       
+    } 
+    catch (System.Net.Http.HttpRequestException e)
+    {
+        ShowMessage = "Error. " + e.Message;
+    }
+    catch (OperationCanceledException)
+    {
+        ShowMessage = "Canceled.";
+    }
 }
+
+//
+// Cancel pending requests.
+//
+public void Cancel()
+{
+    //Throw OperationCanceledException
+    gistClient.Cancel();
+}
+
 ```
 
 ## WPF Sample Project
