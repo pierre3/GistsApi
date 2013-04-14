@@ -147,4 +147,5 @@ Register application, and get your "clientID" and "clientSecret".
  =>[Register a new OAuth application](https://github.com/settings/applications/new)
 
 
-- See [GistApiSample](https://github.com/pierre3/GistsApi/tree/master/GistApiSample) for details.
+- See WpfGists source code for details.
+-- [WpfGists.ViewModel.GistsWindowViewModel.cs](https://github.com/pierre3/GistsApi/blob/master/WpfGists.ViewModel/GistsWindowViewModel.cs)
