@@ -139,6 +139,9 @@ public void Cancel()
 
 ```
 
+See __WpfGists__ source code for details.
+- [WpfGists.ViewModel.GistsWindowViewModel.cs](https://github.com/pierre3/GistsApi/blob/master/WpfGists.ViewModel/GistsWindowViewModel.cs)
+
 ## WPF Sample Project
 ![sample window](https://raw.github.com/pierre3/Images/master/GistApiSampleWindow.png)
 
@@ -146,6 +149,3 @@ To run this application,command-line argument specifies "clientID" and "clientSe
 Register application, and get your "clientID" and "clientSecret".
  =>[Register a new OAuth application](https://github.com/settings/applications/new)
 
-
-- See WpfGists source code for details.
-  + [WpfGists.ViewModel.GistsWindowViewModel.cs](https://github.com/pierre3/GistsApi/blob/master/WpfGists.ViewModel/GistsWindowViewModel.cs)
