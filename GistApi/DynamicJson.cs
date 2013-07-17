@@ -202,7 +202,7 @@ namespace Codeplex.Data
         /// <summary>has property or not</summary>
         public bool IsDefined(string name)
         {
-            return IsObject && (xml.Element(name) != null);
+            return IsObject && (GetElementWith(name) != null);
         }
 
         /// <summary>has property or not</summary>
@@ -214,7 +214,7 @@ namespace Codeplex.Data
         /// <summary>delete property</summary>
         public bool Delete(string name)
         {
-            var elem = xml.Element(name);
+            var elem = GetElementWith(name);
             if (elem != null)
             {
                 elem.Remove();
@@ -326,7 +326,7 @@ namespace Codeplex.Data
             {
                 var ie = (IsArray)
                     ? xml.Elements().Select(x => ToValue(x))
-                    : xml.Elements().Select(x => (dynamic)new KeyValuePair<string, object>(x.Name.LocalName, ToValue(x)));
+                    : xml.Elements().Select(x => (dynamic)new KeyValuePair<string, object>(GetKey(x), ToValue(x)));
                 result = (binder.Type == typeof(object[])) ? ie.ToArray() : ie;
             }
             else
@@ -343,7 +343,6 @@ namespace Codeplex.Data
                 result = null;
                 return false;
             }
-
             result = ToValue(element);
             return true;
         }
@@ -352,7 +351,7 @@ namespace Codeplex.Data
         {
             return (IsArray)
                 ? TryGet(xml.Elements().ElementAtOrDefault((int)indexes[0]), out result)
-                : TryGet(xml.Element((string)indexes[0]), out result);
+                : TryGet(GetElementWith((string)indexes[0]), out result);
         }
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
@@ -364,18 +363,29 @@ namespace Codeplex.Data
 
         private bool TrySet(string name, object value)
         {
-            var type = GetJsonType(value);
-            var element = xml.Element(name);
+            JsonType jsonType = GetJsonType(value);
+            XElement element = null;
+            try
+            {
+                element = this.GetElementWith(name);
+            }
+            catch (XmlException)
+            {
+                this.xml.Add(new XElement(XNamespace.Get("item") + "item",
+                        new XAttribute(XNamespace.Xmlns + "a", "item"),
+                        new XAttribute("item", name),
+                        CreateTypeAttr(jsonType), CreateJsonNode(value)));
+                return true;
+            }
             if (element == null)
             {
-                xml.Add(new XElement(name, CreateTypeAttr(type), CreateJsonNode(value)));
+                this.xml.Add(new XElement(name, CreateTypeAttr(jsonType), CreateJsonNode(value) ));
             }
             else
             {
-                element.Attribute("type").Value = type.ToString();
+                element.Attribute("type").Value = jsonType.ToString();
                 element.ReplaceNodes(CreateJsonNode(value));
             }
-
             return true;
         }
 
@@ -414,7 +424,7 @@ namespace Codeplex.Data
         {
             return (IsArray)
                 ? xml.Elements().Select((x, i) => i.ToString())
-                : xml.Elements().Select(x => x.Name.LocalName);
+                : xml.Elements().Select(x => GetKey(x));
         }
 
         /// <summary>Serialize to JsonString</summary>
@@ -426,6 +436,22 @@ namespace Codeplex.Data
                 elem.RemoveNodes();
             }
             return CreateJsonString(new XStreamingElement("root", CreateTypeAttr(jsonType), xml.Elements()));
+        }
+
+        private string GetKey(XElement x)
+        {
+            if ((x.Name == XNamespace.Get("item") + "item") && (x.Attribute("item") != null))
+            {
+                return x.Attribute("item").Value;
+            }
+            return x.Name.LocalName;
+        }
+
+        private XElement GetElementWith(string name)
+        {
+            return this.xml.Elements(XNamespace.Get("item") + "item")
+                .FirstOrDefault<XElement>(elm => elm.Attribute("item").Value == name)
+                ?? this.xml.Element(name);
         }
     }
 }

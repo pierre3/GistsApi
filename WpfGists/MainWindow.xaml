@@ -16,27 +16,133 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <RadialGradientBrush x:Key="myGistBrush">
+            <GradientStop Color="#FF46E82F" Offset="1"/>
+            <GradientStop Color="#FFE0FDDC"/>
+        </RadialGradientBrush>
+        <RadialGradientBrush x:Key="publicGistBrush" >
+            <GradientStop Color="#FFF5D6FB" Offset="0"/>
+            <GradientStop Color="#FFBA38EA" Offset="1"/>
+        </RadialGradientBrush>
+        <RadialGradientBrush x:Key="starGistBrush" >
+            <GradientStop Color="#FFF8F9E6" Offset="0"/>
+            <GradientStop Color="#FFEAF326" Offset="1"/>
+        </RadialGradientBrush>
+        <RadialGradientBrush x:Key="openButtonBrush" >
+            <GradientStop Color="#FFF9F3E6" Offset="0"/>
+            <GradientStop Color="#FFF3BB26" Offset="1"/>
+        </RadialGradientBrush>
     </Window.Resources>
 
-    <Grid>
+
+    <Grid >
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="320" />
-            <ColumnDefinition />
+            <ColumnDefinition/>
+            <ColumnDefinition Width="400"  />
         </Grid.ColumnDefinitions>
 
-        <Grid>
+        <!-- Web Browser for Login, and Gist Contents Text -->
+        <Grid Grid.Column="0">
             <Grid.RowDefinitions>
+                <RowDefinition  />
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <WebBrowser Grid.Row="0" Name="webBrowser" Margin="2,8,8,8" 
+                    Visibility="{Binding BrowserVisible,Converter={StaticResource BooleanToVisibility}}" >
+                <i:Interaction.Triggers>
+                    <ei:PropertyChangedTrigger Binding="{Binding Path=NavigateUri,Mode=OneWay}">
+                        <my:WebNavigateAction NavigateUri="{Binding Path=NavigateUri, Mode=OneWay}"/>
+                    </ei:PropertyChangedTrigger>
+                </i:Interaction.Triggers>
+                <i:Interaction.Behaviors>
+                    <my:LoadCompletedBehavior LoadCompletedAction="{Binding Path=NavigatedAction, Mode=OneWay}"/>
+                </i:Interaction.Behaviors>
+            </WebBrowser>
+            <TextBox Grid.Row="0" Panel.ZIndex="1" 
+                     HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                     TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" 
+                     Text="{Binding Text}" />
+
+            <Grid Grid.Row="1" Margin="2,4,18,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="1" Content="Filename:"  Margin="0,0,0,2" />
+                <TextBox Grid.Row="1" Grid.Column="1" Padding="2" Margin="0,0,0,2" Text="{Binding UploadFileName,Mode=TwoWay}"/>
+                <StackPanel Grid.Column="2" Grid.Row="0" Orientation="Horizontal">
+                    <Button Padding="4"  Margin="0,0,10,4" 
+                        Content="Open File(s)..."
+                        Background="{StaticResource openButtonBrush}" >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <my:FileDialogAction Title="Choose upload file(s)."
+                                                     MultiSelect="True"
+                                                     FilterIndex ="3"  
+                                                     DefaultExt="*.txt"
+                                                     Filter="Markdown Files(*.md)|*.md|Text Files(*.txt)|*.txt|All Files(*.*)|*.*" 
+                                                     Callback="{Binding OpenFileAction}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Button>
+                    <Button Content="Save as..." Padding="4"  Margin="0,0,0,4" Background="{StaticResource openButtonBrush}" >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <my:FileDialogAction Title="Save As"
+                                                     DialogType ="SaveFile"
+                                                     FilterIndex ="2"  
+                                                     DefaultExt="*.txt"
+                                                     Filter="Markdown Files(*.md)|*.md|Text Files(*.txt)|*.txt|All Files(*.*)|*.*" 
+                                                     Callback="{Binding SaveFileAction}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Button>
+                </StackPanel>
+                <Label Grid.Row="2" Content="Description:" Height="38" Margin="0,0,0,2" />
+                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Padding="2" 
+                         HorizontalAlignment="Stretch"  Margin="0,0,0,2" 
+                         Text="{Binding UploadFileDescription,Mode=TwoWay}" />
+            </Grid>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                <CheckBox Content="Public" Margin="0,4,24,8" IsChecked="{Binding UploadFileIsPublic,Mode=TwoWay}" />
+                <Button Padding="4" Margin="0,0,0,8" Content="Create a Gist" Command="{Binding CreateAGistCommand}"
+                        Background="{StaticResource myGistBrush}"/>
+            </StackPanel>
+
+        </Grid>
+        <GridSplitter Grid.Column="0" Width="8"/>
+
+        <!-- Gists List & Command Buttons -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+
             </Grid.RowDefinitions>
-            <ListBox Grid.Column="0" Margin="8,8,10,8"
+            <TextBlock Grid.Row="0" Text="{Binding ListName}" 
+                       VerticalAlignment="Bottom" Padding="10,0"
+                       FontFamily="Microsoft YaHei UI" FontWeight="Bold" FontSize="16px" FontStyle="Italic"/>
+            <StackPanel Grid.Row="0" Margin="0,2,10,0" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="First" Padding="2" Margin="0,0,4,0" Command="{Binding MoveFirstListCommand}"/>
+                <Button Content="Prev." Padding="2" Margin="0,0,4,0" Command="{Binding MovePrevListCommand}"/>
+                <Button Content="Next" Padding="2" Margin="0,0,4,0" Command="{Binding MoveNextListCommand}"/>
+                <Button Content="Last" Padding="2" Margin="0,0,4,0" Command="{Binding MoveLastListCommand}"/>
+            </StackPanel>
+            <ListBox Grid.Row="1" Grid.Column="0" Margin="8,4,10,8"
                      ItemsSource="{Binding ListItems}"
                      SelectedItem="{Binding SelectedItem, Mode=TwoWay}" IsSynchronizedWithCurrentItem="True">
                 <ListBox.ItemContainerStyle>
@@ -47,7 +153,7 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel>
-                            <TextBlock Text="{Binding Description}" FontWeight="Bold" FontSize="24px"/>
+                            <TextBlock Text="{Binding Description}" FontWeight="Bold" FontSize="16px"/>
                             <ListBox ItemsSource="{Binding Files}" 
                                      BorderThickness="0" 
                                      SelectedItem="{Binding SelectedFile}"
@@ -59,80 +165,55 @@
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Author}" FontWeight="Bold" Foreground="Silver"/>
+                                <TextBlock Margin="16,0,0,0" Text="{Binding CreatedAt}" FontWeight="Bold" Foreground="Silver"/>
+                            </StackPanel>
+                            <Separator Height="1" />
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <WrapPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="4,0,0,0">
-                <Button Padding="10,4" Margin="0,0,4,2" Content="Edit a Gist" Command="{Binding EditAGistCommand}"/>
-                <Button Padding="10,4" Margin="0,0,4,2" Content="Delete a Gist" Command="{Binding DeleteCommand}"/>
-                <Button Padding="10,4" Margin="0,0,16,2" Content="Delete a File" Command="{Binding DeleteFileCommand}"/>
+            <WrapPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="4,0,0,0">
+                <Button Padding="10,4" Margin="0,0,4,2" Content="List My Gists" 
+                        Command="{Binding ListGistsCommand}" 
+                        Background="{StaticResource myGistBrush}"/>
+                <Button Padding="10,4" Margin="0,0,4,2" Content="Edit a Gist" 
+                        Command="{Binding EditAGistCommand}"
+                        Background="{StaticResource myGistBrush}"/>
+                <Button Padding="10,4" Margin="0,0,4,2" Content="Delete a Gist" 
+                        Command="{Binding DeleteCommand}"
+                        Background="{StaticResource myGistBrush}"/>
+                <Button Padding="10,4" Margin="0,0,4,2" Content="Delete a File" 
+                        Command="{Binding DeleteFileCommand}"
+                        Background="{StaticResource myGistBrush}"/>
+                <Button Padding="10,4" Margin="0,0,4,2" Content="List Public Gists" 
+                        Command="{Binding ListPublicGistsCommand}"
+                        Background="{StaticResource publicGistBrush}"/>
+                <TextBox Text="{Binding UserName}" Width="140" Margin="0,0,4,2" 
+                         Padding="2" HorizontalAlignment="Center"/>
+                <Button Padding="10,4" Margin="0,0,4,2" Content="List User's Gists" 
+                        Command="{Binding ListUsersGistsCommand}"
+                        Background="{StaticResource publicGistBrush}"/>
+                <Button Padding="10,4" Margin="0,0,4,2" Content="Fork a Gist" 
+                        Command="{Binding ForkAGistCommand}"
+                        Background="{StaticResource publicGistBrush}" />
+                <Button Padding="10,4" Margin="0,0,4,2" Content="List Starred Gists" 
+                        Command="{Binding ListStarredGistsCommand}"
+                        Background="{StaticResource starGistBrush}" />
+                <Button Padding="10,4" Margin="0,0,4,2" Content="Star a Gist" 
+                        Command="{Binding StarAGistCommand}"
+                        Background="{StaticResource starGistBrush}" />
+                <Button Padding="10,4" Margin="0,0,4,2" Content="Unstar a Gist" 
+                        Command="{Binding UnstarAGistCommand}"
+                        Background="{StaticResource starGistBrush}" />
             </WrapPanel>
-            <Separator Grid.Row="2" Margin="4,24,16,8" Height="4" />
-            <Grid Grid.Row="3" Margin="2,2,18,2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <Label Content="Filename:"  Margin="0,0,0,4" />
-                <TextBox Grid.Column="1" Padding="2" Margin="0,0,0,4" Text="{Binding UploadFileName,Mode=TwoWay}"/>
-                
-                <Button Grid.Column="2" Grid.Row="1" 
-                        Padding="4"  Margin="0,0,0,8" 
-                        HorizontalAlignment="Right"
-                        Content="Open File(s)...">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="Click">
-                            <my:OpenFileDialogAction Title="Choose upload file(s)."
-                                                     MultiSelect="True"
-                                                     DefaultExt="*.txt"
-                                                     Filter="Markdown Files(*.md)|*.md|Text Files(*.txt)|*.txt|All Files(*.*)|*.*" 
-                                                     Callback="{Binding FileOpenedAction}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </Button>
-                
-                <Label Grid.Row="2" Content="Description:" Height="64" Margin="0,0,0,8" />
-                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Padding="2" HorizontalAlignment="Stretch"  Margin="0,0,0,8" 
-                         Text="{Binding UploadFileDescription,Mode=TwoWay}" />
-            </Grid>
-            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
-                <CheckBox Content="Public" Margin="4,8,24,8" IsChecked="{Binding UploadFileIsPublic,Mode=TwoWay}" />
-                <Button Padding="4" Margin="2,2,2,8" Content="Create a Gist" Command="{Binding CreateAGistCommand}"/>
-            </StackPanel>
-        </Grid>
-
-        <GridSplitter Grid.Column="0" Width="8"/>
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <WebBrowser Name="webBrowser" Margin="2,8,8,8" 
-                    Visibility="{Binding BrowserVisible,Converter={StaticResource BooleanToVisibility}}" >
-                <i:Interaction.Triggers>
-                    <ei:PropertyChangedTrigger Binding="{Binding Path=NavigateUri,Mode=OneWay}">
-                        <my:WebNavigateAction NavigateUri="{Binding Path=NavigateUri, Mode=OneWay}"/>
-                    </ei:PropertyChangedTrigger>
-                </i:Interaction.Triggers>
-                <i:Interaction.Behaviors>
-                    <my:LoadCompletedBehavior LoadCompletedAction="{Binding Path=NavigatedAction, Mode=OneWay}"/>
-                </i:Interaction.Behaviors>
-            </WebBrowser>
-            <TextBox Panel.ZIndex="1" 
-                 TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" 
-                 Text="{Binding Text}" />
 
         </Grid>
+
         <StatusBar Grid.Row="1" Grid.ColumnSpan="2">
             <StatusBarItem >
-            <TextBlock Padding="4" Text="{Binding StatusMessage}" />
+                <TextBlock Padding="4" Text="{Binding StatusMessage}" />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <ProgressBar Width="128" Height="16" IsIndeterminate="{Binding IsProcessing}" />

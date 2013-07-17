@@ -49,6 +49,16 @@ namespace WpfGists.ViewModel
       get { return _source.@public; }
     }
 
+    public string Author
+    {
+        get { return "@" + this._source.user.login; }
+    }
+
+    public string CreatedAt
+    {
+        get { return DateTime.Parse(this._source.created_at).ToLocalTime().ToShortDateString(); }
+    }
+
     public GistListItem()
     {
       this._source = new GistObject();
