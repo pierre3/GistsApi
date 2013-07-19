@@ -6,8 +6,8 @@ This is [Gists API v3](http://developer.github.com/v3/gists/) library for .Net.
 - Parsing JSON using [DynamicJson](http://dynamicjson.codeplex.com/).
 
 ## Install
-- from nuget gallery  
-[GistsApi](https://nuget.org/packages/GistsApi/)
+from nuget gallery  
+- https://nuget.org/packages/GistsApi/
 
 ```
 PM> Install-Package GistApi
@@ -209,3 +209,6 @@ To run this application, specify "clientID" and "clientSecret".
     </WpfGists.Properties.Settings>
 </applicationSettings>
 ```
+
+## License 
+[Microsoft Public License (MS-PL)](http://opensource.org/licenses/MS-PL)
