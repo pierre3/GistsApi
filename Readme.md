@@ -5,6 +5,14 @@ This is [Gists API v3](http://developer.github.com/v3/gists/) library for .Net.
 - HttpClient ([System.Net.Http Namespace](http://msdn.microsoft.com/library/system.net.http.aspx)) based async methods.
 - Parsing JSON using [DynamicJson](http://dynamicjson.codeplex.com/).
 
+## Install
+- from nuget gallery  
+[GistsApi](https://nuget.org/packages/GistsApi/)
+
+```
+PM> Install-Package GistApi
+```
+
 ## GistClient class
 
 ```cs
@@ -12,30 +20,59 @@ public class GistClient
 {
     public async Task Authorize(string authCode);
 
+    //POST https://api.github.com/gists
     public async Task<GistObject> CreateAGist(string description, bool isPublic, IEnumerable<Tuple<string, string>> fileContentCollection);
     
+    //PATCH https://api.github.com/gists/:id
     public async Task<GistObject> EditAGist(string id, string description, string targetFilename, string content);
+
+    //PATCH https://api.github.com/gists/:id (Change filename)
     public async Task<GistObject> EditAGist(string id, string description, string oldFilename, string newFilename, string content);
     
+    //PATCH https://api.github.com/gists/:id (Set "null" to filename)
     public async Task<GistObject> DeleteAFile(string id, string description, string filename);
+    
+    //DELETE https://api.github.com/gists/:id
     public async Task DeleteAGist(string id);
     
+    //GET https://api.github.com/gists (List authenticated users gist)
     public async Task<IEnumerable<GistObject>> ListGists();
-    public async Task<IEnumerable<GistObject>> ListGists(ListMode mode);
+
+    //GET https://api.github.com/users/:user/gists
     public async Task<IEnumerable<GistObject>> ListGists(string user);
-    public async Task<IEnumerable<GistObject>> ListGists(Uri requestUrl);
+
+    //GET https://api.github.com/users/:user/gists?since=:date_time
     public async Task<IEnumerable<GistObject>> ListGists(string user, DateTime since);
     
+    //List PublicGists, UsersGists, AuthenticatedUserGists or AuthenticatedUserStarredGists
+    public async Task<IEnumerable<GistObject>> ListGists(ListMode mode);
+    
+    //GET https://api.github.com/gists/:id
     public async Task<GistObject> GetSingleGist(string id);
     
+    //POST https://api.github.com/gists/:id/forks
     public async Task<GistObject> ForkAGist(string id);
     
+    //PUT https://api.github.com/gists/:id/star
     public async Task StarAGist(string id);
+    
+    //DELETE https://api.github.com/gists/:id/star
     public async Task UnstarAGist(string id);
 
+    //GET row_url (from API response)
     public async Task<string> DownloadRawText(Uri rawUrl);
     
+    //Cancel all pending requests
     public void Cancel();
+    
+    //List mode for ListGists method 
+    public enum ListMode
+    {
+        PublicGists,
+        UsersGists,
+        AuthenticatedUserGists,
+        AuthenticatedUserStarredGists
+    }
 }
 
 ```
@@ -52,7 +89,7 @@ public MainWindow()
 {
     InitializeComponent();
     
-    gistClient = new GistClient("clientID", "clientSecret");
+    gistClient = new GistClient("clientID", "clientSecret", "userAgent");
     
     //navigate to "https://github.com/login/oauth/authorize" 
     webBrowser.Navigate(gistClient.AuthorizeUrl);

@@ -316,7 +316,7 @@ namespace WpfGists.ViewModel
             {
                 if (this._listGists == null)
                 {
-                    this._listGists = new DelegateCommand(_ => this.ListGists(GistClient.ListMode.AuthenticatedUserGist));
+                    this._listGists = new DelegateCommand(_ => this.ListGists(GistClient.ListMode.AuthenticatedUserGists));
                 }
                 return this._listGists;
             }
@@ -340,7 +340,7 @@ namespace WpfGists.ViewModel
             {
                 if (this._listStarredGists == null)
                 {
-                    this._listStarredGists = new DelegateCommand(_ => this.ListGists(GistClient.ListMode.AuthenticatedUserStarredGist));
+                    this._listStarredGists = new DelegateCommand(_ => this.ListGists(GistClient.ListMode.AuthenticatedUserStarredGists));
                 }
                 return this._listStarredGists;
             }
@@ -671,11 +671,11 @@ namespace WpfGists.ViewModel
                     await this.ListUsersGists(this.UserName);
                     break;
 
-                case GistClient.ListMode.AuthenticatedUserGist:
+                case GistClient.ListMode.AuthenticatedUserGists:
                     await this.ListMyGists();
                     break;
 
-                case GistClient.ListMode.AuthenticatedUserStarredGist:
+                case GistClient.ListMode.AuthenticatedUserStarredGists:
                     await this.ListStarredGists();
                     break;
             }
@@ -713,7 +713,7 @@ namespace WpfGists.ViewModel
         {
             await this.TryAsyncApi("List Starred Gists", async delegate
             {
-                IEnumerable<GistObject> gists = await this._gistClient.ListGists(GistClient.ListMode.AuthenticatedUserStarredGist);
+                IEnumerable<GistObject> gists = await this._gistClient.ListGists(GistClient.ListMode.AuthenticatedUserStarredGists);
                 this.ListItems = new ObservableCollection<GistListItem>(gists.Select(item =>
                     new GistListItem(item, GistListItem_SelectedFileChanged)));
                 this.ListName = "My Starred Gists";

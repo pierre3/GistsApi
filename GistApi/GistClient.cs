@@ -221,7 +221,8 @@ namespace GistsApi
             }
             else
             {
-                requestUrl = new Uri(string.Format("https://api.github.com/gists{0}?access_token={1}", (mode == ListMode.AuthenticatedUserStarredGist) ? "/starred" : "", this._accessToken));
+                requestUrl = new Uri(string.Format("https://api.github.com/gists{0}?access_token={1}", 
+                    (mode == ListMode.AuthenticatedUserStarredGists) ? "/starred" : "", this._accessToken));
             }
             return await this.ListGists(requestUrl);
         }
@@ -373,8 +374,8 @@ namespace GistsApi
         {
             PublicGists,
             UsersGists,
-            AuthenticatedUserGist,
-            AuthenticatedUserStarredGist
+            AuthenticatedUserGists,
+            AuthenticatedUserStarredGists
         }
         #endregion
     }
