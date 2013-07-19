@@ -6,8 +6,8 @@ This is [Gists API v3](http://developer.github.com/v3/gists/) library for .Net.
 - Parsing JSON using [DynamicJson](http://dynamicjson.codeplex.com/).
 
 ## Install
-- from nuget gallery  
-[GistsApi](https://nuget.org/packages/GistsApi/)
+from nuget gallery  
+- https://nuget.org/packages/GistsApi/
 
 ```
 PM> Install-Package GistApi
@@ -187,8 +187,11 @@ public void Cancel()
 See __WpfGists__ source code for details.
 - [WpfGists.ViewModel.GistsWindowViewModel.cs](https://github.com/pierre3/GistsApi/blob/master/WpfGists.ViewModel/GistsWindowViewModel.cs)
 
-## WPFGist
+## WPFGists
 GistsAPI client GUI for Windows. 
+
+#### download => [release v0.5] (https://github.com/pierre3/GistsApi/releases)
+
 ![sample window](https://raw.github.com/pierre3/Images/master/GistApiSampleWindow.png)
 
 To run this application, specify "clientID" and "clientSecret".
@@ -209,3 +212,6 @@ To run this application, specify "clientID" and "clientSecret".
     </WpfGists.Properties.Settings>
 </applicationSettings>
 ```
+
+## License 
+[Microsoft Public License (MS-PL)](http://opensource.org/licenses/MS-PL)
