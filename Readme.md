@@ -10,7 +10,7 @@ from nuget gallery
 - https://nuget.org/packages/GistsApi/
 
 ```
-PM> Install-Package GistApi
+PM> Install-Package GistsApi
 ```
 
 ## GistClient class
