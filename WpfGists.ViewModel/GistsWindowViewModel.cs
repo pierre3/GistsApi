@@ -14,38 +14,41 @@ namespace WpfGists.ViewModel
     public class GistsWindowViewModel : INotifyPropertyChanged
     {
         #region Fields
-        private bool _browserVisible;
+        private Action<string[]> _openFileAction;
+        private Action<string[]> _saveFileAction;
+        private Action<NavigationResult> _navigatedAction;
         private ICommand _createAGist;
         private ICommand _delete;
         private ICommand _deleteFile;
         private ICommand _editAGist;
-        private Action<string[]> _openFileAction;
-        private Action<string[]> _saveFileAction;
         private ICommand _forkAGist;
-        private GistClient _gistClient;
-        private ObservableCollection<GistListItem> _gists;
-        private bool _isProcessing;
         private ICommand _listGists;
-        private string _listName;
         private ICommand _listPublicGists;
         private ICommand _listStarredGists;
         private ICommand _listUsersGists;
+        private ICommand _starAGist;
+        private ICommand _unstarAGist;
         private ICommand _moveFirstList;
         private ICommand _moveLastList;
         private ICommand _moveNextList;
         private ICommand _movePrevList;
-        private Action<NavigationResult> _navigatedAction;
+        private ICommand _downloadFile;
+        private ObservableCollection<GistListItem> _gists;
         private Uri _navigateUri;
-        private string[] _selectedFiles;
         private GistListItem _selectedItem;
-        private ICommand _starAGist;
+        private string[] _selectedFiles;
+        private GistClient _gistClient;
         private string _statusMessage;
         private string _text;
-        private ICommand _unstarAGist;
+        private string _gistContents;
+        private bool _browserVisible;
+        private string _listName;
+        private bool _isProcessing;
         private string _uploadFileDescription;
         private bool _uploadFileIsPublic;
         private string _uploadFileName;
         private string _userName = "user name";
+        private bool _showPreview;
         #endregion
 
         #region Properties
@@ -73,8 +76,11 @@ namespace WpfGists.ViewModel
                     this.OnPropertyChanged("SelectedItem");
                     if (this.SelectedItem != null)
                     {
-                        this.UploadFileDescription = this._selectedItem.Description;
-                        this.OpenItem(this._selectedItem.SelectedFile);
+                        if (ShowPreview)
+                        {
+                            //this.UploadFileDescription = this._selectedItem.Description;
+                            this.OpenItem(this._selectedItem.SelectedFile);
+                        }
                     }
                 }
             }
@@ -161,6 +167,19 @@ namespace WpfGists.ViewModel
             }
         }
 
+        public string GistContents
+        {
+            get { return _gistContents; }
+            set 
+            {
+                if (_gistContents == value)
+                { return; }
+
+                _gistContents = value;
+                OnPropertyChanged("GistContents");
+            }
+        }
+
         public string UploadFileDescription
         {
             get { return this._uploadFileDescription; }
@@ -209,6 +228,19 @@ namespace WpfGists.ViewModel
                 {
                     this._userName = value;
                     this.OnPropertyChanged("UserName");
+                }
+            }
+        }
+
+        public bool ShowPreview
+        {
+            get { return this._showPreview; }
+            set
+            {
+                if (this._showPreview != value)
+                {
+                    this._showPreview = value;
+                    this.OnPropertyChanged("ShowPreview");
                 }
             }
         }
@@ -434,6 +466,24 @@ namespace WpfGists.ViewModel
                 return this._unstarAGist;
             }
         }
+
+        public ICommand DownloadSelectedFile
+        {
+            get
+            {
+                if (this._downloadFile == null)
+                {
+                    this._downloadFile = new DelegateCommand(
+                        _ => 
+                        {
+                            UploadFileDescription = SelectedItem.Description;
+                            DownloadItem(SelectedItem.SelectedFile);
+                        },
+                        _ => IsSelected());
+                }
+                return this._downloadFile;
+            }
+        }
         #endregion
 
         #endregion
@@ -455,6 +505,7 @@ namespace WpfGists.ViewModel
         {
             this._gistClient = new GistClient(clientId, clientSecret, "WpfGists/0.5");
             this.ListItems = new ObservableCollection<GistListItem>();
+            this.ShowPreview = true;
         }
         #endregion
 
@@ -564,8 +615,18 @@ namespace WpfGists.ViewModel
             if (file == null)
             { return; }
 
-            UploadFileName = file.filename;
+            //UploadFileName = file.filename;
             await TryAsyncApi("Open " + file.filename,
+              async () => GistContents = await _gistClient.DownloadRawText(new Uri(file.raw_url)));
+        }
+
+        private async void DownloadItem(File file)
+        {
+            if (file == null)
+            { return; }
+
+            UploadFileName = file.filename;
+            await TryAsyncApi("Download " + file.filename,
               async () => Text = await _gistClient.DownloadRawText(new Uri(file.raw_url)));
         }
 
@@ -782,7 +843,10 @@ namespace WpfGists.ViewModel
         {
             if (_selectedItem.Files.Contains(file))
             {
-                OpenItem(file);
+                if (ShowPreview)
+                {
+                    OpenItem(file);
+                }
             }
         }
         #endregion

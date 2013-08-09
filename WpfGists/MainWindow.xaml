@@ -6,8 +6,10 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
         Title="Gists" Height="800" Width="1024">
+   
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
+        <my:BooleanToGridSpanConverter x:Key="BooleanToGridSpanConverter"/>
         <Style TargetType="ListBox" x:Key="listItemStyle1">
             <Setter Property="IsHitTestVisible" Value="False" />
             <Style.Triggers>
@@ -41,8 +43,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="400"  />
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="2*"  />
         </Grid.ColumnDefinitions>
 
         <!-- Web Browser for Login, and Gist Contents Text -->
@@ -52,7 +54,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <WebBrowser Grid.Row="0" Name="webBrowser" Margin="2,8,8,8" 
+            <WebBrowser Grid.Row="0" Name="webBrowser" Margin="4,4,14,4" 
                     Visibility="{Binding BrowserVisible,Converter={StaticResource BooleanToVisibility}}" >
                 <i:Interaction.Triggers>
                     <ei:PropertyChangedTrigger Binding="{Binding Path=NavigateUri,Mode=OneWay}">
@@ -63,7 +65,7 @@
                     <my:LoadCompletedBehavior LoadCompletedAction="{Binding Path=NavigatedAction, Mode=OneWay}"/>
                 </i:Interaction.Behaviors>
             </WebBrowser>
-            <TextBox Grid.Row="0" Panel.ZIndex="1" 
+            <TextBox Grid.Row="0" Panel.ZIndex="1" Margin="4,4,14,4" FontFamily="Consolas" Padding="4"
                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                      TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" 
                      Text="{Binding Text}" />
@@ -131,7 +133,8 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" Text="{Binding ListName}" 
                        VerticalAlignment="Bottom" Padding="10,0"
@@ -142,39 +145,67 @@
                 <Button Content="Next" Padding="2" Margin="0,0,4,0" Command="{Binding MoveNextListCommand}"/>
                 <Button Content="Last" Padding="2" Margin="0,0,4,0" Command="{Binding MoveLastListCommand}"/>
             </StackPanel>
-            <ListBox Grid.Row="1" Grid.Column="0" Margin="8,4,10,8"
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="0.5*" />
+                </Grid.RowDefinitions>
+                <ListBox Grid.Row="0" Margin="4,4,4,0" VerticalAlignment="Stretch" Grid.RowSpan="{Binding ShowPreview,Converter={StaticResource BooleanToGridSpanConverter}}"
                      ItemsSource="{Binding ListItems}"
                      SelectedItem="{Binding SelectedItem, Mode=TwoWay}" IsSynchronizedWithCurrentItem="True">
-                <ListBox.ItemContainerStyle>
-                    <Style>
-                        <Setter Property="ListBoxItem.HorizontalContentAlignment" Value="Stretch"/>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel>
-                            <TextBlock Text="{Binding Description}" FontWeight="Bold" FontSize="16px"/>
-                            <ListBox ItemsSource="{Binding Files}" 
+                    <ListBox.ItemContainerStyle>
+                        <Style>
+                            <Setter Property="ListBoxItem.HorizontalContentAlignment" Value="Stretch"/>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <StackPanel.ContextMenu>
+                                    <ContextMenu >
+                                        <MenuItem Header="Copy to Clipboard (Plain URL)"  Command="{Binding CopyPlainUrlCommand}" />
+                                        <MenuItem Header="Copy to Clipboard (Link for Markdown)" Command="{Binding CopyMarkdownLinkUrlCommand}" />
+                                    </ContextMenu>
+                                </StackPanel.ContextMenu>
+                                <TextBlock Text="{Binding Description}" FontWeight="Bold" FontSize="16px"/>
+                                <ListBox ItemsSource="{Binding Files}" 
                                      BorderThickness="0" 
                                      SelectedItem="{Binding SelectedFile}"
                                      IsSynchronizedWithCurrentItem="True" 
                                      Style="{StaticResource ResourceKey=listItemStyle1}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding filename}" Padding="4,0"/>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Author}" FontWeight="Bold" Foreground="Silver"/>
-                                <TextBlock Margin="16,0,0,0" Text="{Binding CreatedAt}" FontWeight="Bold" Foreground="Silver"/>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding filename}" Padding="4,0"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Author}" FontWeight="Bold" Foreground="Silver"/>
+                                    <TextBlock Margin="16,0,0,0" Text="{Binding CreatedAt}" FontWeight="Bold" Foreground="Silver"/>
+                                </StackPanel>
+                                <Separator Height="1" />
                             </StackPanel>
-                            <Separator Height="1" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <WrapPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="4,0,0,0">
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <GridSplitter Grid.Row="1" Height="8" 
+                              HorizontalAlignment="Stretch" VerticalAlignment="Center" ShowsPreview="True" 
+                              Visibility="{Binding ShowPreview,Converter={StaticResource BooleanToVisibility}}"/>
+                <TextBox Grid.Row="2" Margin="4,0" IsReadOnly="True"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto" 
+                         ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                         FontFamily="Consolas"
+                         Text="{Binding GistContents}"
+                         Visibility="{Binding ShowPreview,Converter={StaticResource BooleanToVisibility}}"/>
+            </Grid>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="4,4,4,12">
+                <Button Content="Download a Selected File" Padding="4,2" Command="{Binding DownloadSelectedFile}" Background="{StaticResource openButtonBrush}"/>
+                <CheckBox Content="Show Preview" Padding="2" Margin="8,0"
+                          VerticalContentAlignment="Center"
+                          IsChecked="{Binding ShowPreview}"/>
+            </StackPanel>
+            <WrapPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Left" Margin="4,0,0,0">
                 <Button Padding="10,4" Margin="0,0,4,2" Content="List My Gists" 
                         Command="{Binding ListGistsCommand}" 
                         Background="{StaticResource myGistBrush}"/>

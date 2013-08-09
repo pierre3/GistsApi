@@ -71,6 +71,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BooleanToGridSpanConverter.cs" />
     <Compile Include="WebNavigateAction.cs" />
     <Compile Include="NavigateCompletedAction.cs" />
     <Compile Include="OpenFileDialogAction.cs" />
