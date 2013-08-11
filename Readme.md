@@ -194,24 +194,11 @@ GistsAPI client GUI for Windows.
 
 ![sample window](https://raw.github.com/pierre3/Images/master/GistApiSampleWindow.png)
 
-To run this application, specify "clientID" and "clientSecret".
-
-1. Register application, and get your "clientID" and "clientSecret".
- =>[Register a new OAuth application](https://github.com/settings/applications/new)
-2. Edit a "WpfGists.exe.config" file.
-
-```xml
-<applicationSettings>
-    <WpfGists.Properties.Settings>
-        <setting name="ClientID" serializeAs="String">
-            <value>your clientID</value>
-        </setting>
-        <setting name="ClientSecret" serializeAs="String">
-            <value>your clientSecret</value>
-        </setting>
-    </WpfGists.Properties.Settings>
-</applicationSettings>
-```
+#### WpfGists -Features
+- Upload a new gist (create a single-file gist, and multi-files gists)
+- Display and edit a content of downloaded gist.
+- List Gists (My gists, All public gists, User's gists, My starred gist)
+- Fork and Star a gist.
 
 ## License 
 [Microsoft Public License (MS-PL)](http://opensource.org/licenses/MS-PL)
