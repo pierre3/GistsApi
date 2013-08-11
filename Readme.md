@@ -190,7 +190,7 @@ See __WpfGists__ source code for details.
 ## WPFGists
 GistsAPI client GUI for Windows. 
 
-#### download => [release v0.6.0.0] (https://github.com/pierre3/GistsApi/releases)
+#### download => [release v0.5.1.0] (https://github.com/pierre3/GistsApi/releases)
 
 ![sample window](https://raw.github.com/pierre3/Images/master/GistApiSampleWindow.png)
 
