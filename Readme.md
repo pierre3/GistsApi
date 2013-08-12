@@ -200,5 +200,8 @@ GistsAPI client GUI for Windows.
 - List Gists (My gists, All public gists, User's gists, My starred gist)
 - Fork and Star a gist.
 
+#### WpfGists Document
+- https://gist.github.com/6207197 (in Japanese)
+
 ## License 
 [Microsoft Public License (MS-PL)](http://opensource.org/licenses/MS-PL)
