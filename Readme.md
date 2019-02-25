@@ -110,7 +110,7 @@ private async void webBrowser_LoadCompleted(object sender, NavigationEventArgs e
 }
 ```
 
-### Exsamples
+### Examples
 
 ```cs
 private GistClient gistClient;
